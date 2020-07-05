@@ -23,6 +23,33 @@ app.get('/hello-world', (req, res) => {
 });
 
 
+// // Read (get) - login
+// app.get('/api/login/:id', (req, res) => {
+    
+//     (async () => {
+
+//         try
+//         {
+//             const document = db.collection('usuarios').doc(req.params.id);
+//             let data = await document.get();
+//             let response = data.data();
+
+
+//             return res.status(200).send(response);
+//         }
+//         catch(error)
+//         {
+//             console.log(error);
+//             return res.status(500).send(error);
+//         }
+
+//     })();
+
+// });
+
+
+
+
 // Create (post) - cadastro
 app.post('/api/create', (req, res) => {
     
@@ -34,8 +61,15 @@ app.post('/api/create', (req, res) => {
             .create({
                 name: req.body.name,
                 email: req.body.email,
-                password: req.body.password
+                email2: req.body.email2,
+                cpf: req.body.cpf,
+                cnpj: req.body.cnpj,
+                password: req.body.password,
+                password2: req.body.password2,
+                date: req.body.date
             })
+            // if(email !== email2) throw new Error;
+            // if(password !== password2) throw new Error;
 
             return res.status(200).send();
         }
@@ -50,7 +84,7 @@ app.post('/api/create', (req, res) => {
 });
 
 
-// Read (get) - read a specific produt based on ID
+// Read (get) - read a specific user based on ID
 app.get('/api/read/:id', (req, res) => {
     
     (async () => {
@@ -58,8 +92,8 @@ app.get('/api/read/:id', (req, res) => {
         try
         {
             const document = db.collection('usuarios').doc(req.params.id);
-            let product = await document.get();
-            let response = product.data();
+            let data = await document.get();
+            let response = data.data();
 
             return res.status(200).send(response);
         }
@@ -74,7 +108,7 @@ app.get('/api/read/:id', (req, res) => {
 });
 
 
-// Read (get) - read all produts
+// Read (get) - read all users
 app.get('/api/read', (req, res) => {
     
     (async () => {
@@ -93,7 +127,10 @@ app.get('/api/read', (req, res) => {
                         id: doc.id,
                         name: doc.data().name,
                         email: doc.data().email,
-                        password: doc.data().password
+                        cpf: doc.data().cpf,
+                        cnpj: doc.data().cnpj,
+                        password: doc.data().password,
+                        date: doc.data().date
                     };
                     response.push(selectedItem);
                 }
@@ -112,6 +149,47 @@ app.get('/api/read', (req, res) => {
 });
 
 
+// Read (get) - login
+app.get('/api/login', (req, res) => {
+    
+    (async () => {
+
+        try
+        {
+            let query = db.collection('usuarios');
+            let response = [];
+
+            const email = 'rapha@gmail.com';
+            const senha = '1234';
+
+            await query.get().then(querySnapshot => {
+                let docs = querySnapshot.docs; // result of the query
+
+                for (let doc of docs)
+                {
+                    const selectedItem = {
+                        id: doc.id,
+                        name: doc.data().name,
+                        email: doc.data().email,
+                        password: doc.data().password,
+                    };
+
+                    if(email == selectedItem.email && senha == selectedItem.password){        
+                        response.push(selectedItem);                
+                        return res.status(200).send(response);
+                    }
+                }
+            });
+        }
+        catch(error)
+        {
+            console.log(error);
+            return res.status(500).send(error);
+        }
+    })();
+});
+
+
 // Update (put) - update by id
 app.put('/api/update/:id', (req, res) => {
     
@@ -124,7 +202,7 @@ app.put('/api/update/:id', (req, res) => {
             await document.update({
                 name: req.body.name,
                 email: req.body.email,
-                password: req.body.password
+                date: req.body.date
             });
 
             return res.status(200).send();
