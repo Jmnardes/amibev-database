@@ -4,6 +4,7 @@ var admin = require("firebase-admin");
 
 var serviceAccount = require("./permissions.json");
 
+// inicializador do app via firebase
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://amibev-b2cfe.firebaseio.com"
@@ -27,7 +28,7 @@ app.post('/api/sign', (req, res) => {
         try
         {
             // sequencia de ifs para validar os dados de cadastro
-            if(req.body.name === '' || req.body.email === '' || req.body.email2 === '' || req.body.cpf === '' || req.body.cnpj === '' || req.body.password === '' || req.body.password === '' || req.body.date === '') throw "Error";
+            if(req.body.name === "" || req.body.email === "" || req.body.email2 === "" || req.body.cpf === "" || req.body.cnpj === "" || req.body.password === "" || req.body.password === "" || req.body.date === "") throw "Error";
             if(req.body.email !== req.body.email2 || req.body.password !== req.body.password2) throw "Error";
             if(!validaCPF(req.body.cpf)) throw "Error";
             if(!validaCNPJ(req.body.cnpj)) throw "Error";
@@ -129,25 +130,25 @@ app.get('/api/login', (req, res) => {
 
 // DELETE
 
-// app.delete('/api/delete/:id', (req, res) => {
+app.delete('/api/delete/:id', (req, res) => {
     
-//     (async () => {
+    (async () => {
 
-//         try
-//         {
-//             const document = db.collection('usuarios').doc(req.params.id);
-//             await document.delete();
-//             return res.status(200).send();
-//         }
-//         catch(error)
-//         {
-//             console.log(error);
-//             return res.status(500).send(error);
-//         }
+        try
+        {
+            const document = db.collection('usuarios').doc(req.params.id);
+            await document.delete();
+            return res.status(200).send();
+        }
+        catch(error)
+        {
+            console.log(error);
+            return res.status(500).send(error);
+        }
 
-//     })();
+    })();
 
-// });
+});
 
 
 // Export the api to firebase cloud function
