@@ -93,7 +93,6 @@ class ValidaFormulario {
 
     validaCEP(campo){
         const cep = validaCEP(campo.value);
-        
         if(!cep) {
             this.criaErro(campo, 'CEP inválido.');
             return false;

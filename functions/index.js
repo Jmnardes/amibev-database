@@ -26,23 +26,48 @@ app.post('/api/sign', (req, res) => {
 
         try
         {
-            if(req.body.email !== req.body.email2 || req.body.password !== req.body.password2){
-                 throw "Error"
-            }else{
-                id += 1;
-                await db.collection('usuarios').doc('/' + id + '/')
-                .create({
-                    name: req.body.name,
-                    email: req.body.email,
-                    email2: req.body.email2,
-                    cpf: req.body.cpf,
-                    cnpj: req.body.cnpj,
-                    password: req.body.password,
-                    password2: req.body.password2,
-                    date: req.body.date
-                })
-                return res.status(200).send("success");
-            }
+            // sequencia de ifs para validar os dados de cadastro
+            if(req.body.name === '' || req.body.email === '' || req.body.email2 === '' || req.body.cpf === '' || req.body.cnpj === '' || req.body.password === '' || req.body.password === '' || req.body.date === '') throw "Error";
+            if(req.body.email !== req.body.email2 || req.body.password !== req.body.password2) throw "Error";
+            if(!validaCPF(req.body.cpf)) throw "Error";
+            if(!validaCNPJ(req.body.cnpj)) throw "Error";
+            
+            // recebendo a coleção usuario e utilizando o snapshot com for pra ler os valores do db
+            let query = db.collection('usuarios');
+            await query.get().then(querySnapshot => {
+                let docs = querySnapshot.docs;
+
+                // faz um for pra verificar existencia de email
+                for (let doc of docs)
+                {
+                    const selectedItem = {
+                        email: doc.data().email,
+                    };
+
+                    // verifica se email e senha são iguais aos digitados
+                    if(req.body.email === selectedItem.email) throw "Error";
+                }
+            });
+
+            
+            // incrementação do id
+            id += 1;
+            await db.collection('usuarios').doc('/' + id + '/') // chama a coleção de usuarios através do id
+            .create({
+
+                // valores do cadastro
+                name: req.body.name,
+                email: req.body.email,
+                email2: req.body.email2,
+                cpf: req.body.cpf,
+                cnpj: req.body.cnpj,
+                password: req.body.password,
+                password2: req.body.password2,
+                date: req.body.date
+            })
+
+            // se não ocorrer nenhum erro ele retorna um success
+            return res.status(200).send("success");
         }
         catch(error)
         {
@@ -64,12 +89,15 @@ app.get('/api/login', (req, res) => {
         {
             let query = db.collection('usuarios');
             let response = [];
+
+            // recebe email e password pra validar o perfil
             const email = req.body.email;
             const password = req.body.password;
 
             await query.get().then(querySnapshot => {
-                let docs = querySnapshot.docs; // result of the query
+                let docs = querySnapshot.docs; // resultado do query
 
+                // faz um for pra achar o perfil da pessoa
                 for (let doc of docs)
                 {
                     const selectedItem = {
@@ -79,6 +107,7 @@ app.get('/api/login', (req, res) => {
                         password: doc.data().password,
                     };
 
+                    // verifica se email e senha são iguais aos digitados
                     if(email === selectedItem.email && password === selectedItem.password){        
                         response.push(selectedItem);                
                         return res.status(200).send(response);
@@ -100,25 +129,25 @@ app.get('/api/login', (req, res) => {
 
 // DELETE
 
-app.delete('/api/delete/:id', (req, res) => {
+// app.delete('/api/delete/:id', (req, res) => {
     
-    (async () => {
+//     (async () => {
 
-        try
-        {
-            const document = db.collection('usuarios').doc(req.params.id);
-            await document.delete();
-            return res.status(200).send();
-        }
-        catch(error)
-        {
-            console.log(error);
-            return res.status(500).send(error);
-        }
+//         try
+//         {
+//             const document = db.collection('usuarios').doc(req.params.id);
+//             await document.delete();
+//             return res.status(200).send();
+//         }
+//         catch(error)
+//         {
+//             console.log(error);
+//             return res.status(500).send(error);
+//         }
 
-    })();
+//     })();
 
-});
+// });
 
 
 // Export the api to firebase cloud function
